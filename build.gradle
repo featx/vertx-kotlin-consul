@@ -1,21 +1,20 @@
 plugins {
   id 'application'
-  id 'org.jetbrains.kotlin.jvm' version '1.3.30'
-  id 'com.github.johnrengelman.shadow' version '5.0.0'
+  id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+  id 'com.github.johnrengelman.shadow' version "$shadowVersion"
 }
 
-group = 'com.juext.artisan'
-version = '1.0.0-SNAPSHOT'
+group = "org.featx.cusp.user"
+version = "1.0.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
-  jcenter()
 }
 
 ext {
-  kotlinVersion = '1.3.30'
-  vertxVersion = '3.7.0'
-  junitJupiterEngineVersion = '5.4.0'
+//  kotlinVersion = "${kotlin.version}"
+//  vertxVersion = "${vertx.version}"
+//  junitJupiterEngineVersion = "${junitVersion}"
 }
 
 application {
@@ -23,40 +22,54 @@ application {
 }
 
 
-def mainVerticleName = 'com.juext.artisan.ucs.MainVerticle'
-def watchForChange = 'src/**/*'
-def doOnChange = './gradlew classes'
+def mainVerticleName = "org.featx.cusp.user.MainVerticle"
+def watchForChange = "src/**/*"
+def doOnChange = "./gradlew classes"
 
 dependencies {
-  implementation "io.vertx:vertx-circuit-breaker:$vertxVersion"
-  implementation "io.vertx:vertx-service-discovery:$vertxVersion"
-  implementation "io.vertx:vertx-consul-client:$vertxVersion"
+  implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
 
-  implementation "io.vertx:vertx-web:$vertxVersion"
-  implementation "io.vertx:vertx-config:$vertxVersion"
-  implementation "io.vertx:vertx-jdbc-client:$vertxVersion"
-  implementation "io.vertx:vertx-core:$vertxVersion"
-  implementation "io.vertx:vertx-rx-java2:$vertxVersion"
-  implementation "io.vertx:vertx-lang-kotlin:$vertxVersion"
-  implementation 'com.englishtown.vertx:vertx-guice:2.3.1'
+  implementation("io.vertx:vertx-service-discovery")
+  implementation("io.vertx:vertx-config")
+  implementation("io.vertx:vertx-consul-client")
+  implementation("io.vertx:vertx-circuit-breaker")
+  implementation("io.vertx:vertx-health-check")
 
-  implementation 'com.zaxxer:HikariCP:3.3.1'
-  implementation 'mysql:mysql-connector-java:8.0.15'
-  implementation "io.vertx:vertx-mysql-postgresql-client:$vertxVersion"
+  implementation("io.vertx:vertx-web")
+  implementation("io.vertx:vertx-web-api-contract")
+  implementation("io.vertx:vertx-web-sstore-redis")
+  implementation("io.vertx:vertx-web-openapi")
+  implementation("io.vertx:vertx-web-client")
+  implementation("io.vertx:vertx-web-validation")
 
-  testImplementation "io.vertx:vertx-junit5:$vertxVersion"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion"
-  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion"
+  implementation("io.vertx:vertx-redis-client")
+  implementation("io.vertx:vertx-mysql-client")
+//  implementation("io.vertx:vertx-jdbc-client")
+
+//  implementation("io.vertx:vertx-rx-java3")
+//  implementation("io.vertx:vertx-reactive-streams")
+  implementation("com.google.inject:guice:$guiceVersion")
+  implementation("io.vertx:vertx-lang-kotlin")
+  implementation("io.vertx:vertx-lang-kotlin-coroutines")
+//  implementation("io.vertx:vertx-core")
+//  implementation('com.englishtown.vertx:vertx-guice:2.3.1')
+  implementation("com.zaxxer:HikariCP:$hikariVersion")
+  implementation("org.mariadb:r2dbc-mariadb:1.0.1")
+  //  implementation(kotlin("stdlib-jdk8"))
+
+  testImplementation("io.vertx:vertx-junit5")
+  testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 }
 
 compileKotlin {
-  kotlinOptions.jvmTarget = '1.8'
+  kotlinOptions.jvmTarget = "16"//JavaVersion.VERSION_16
 }
 
 compileTestKotlin {
-  kotlinOptions.jvmTarget = '1.8'
+  kotlinOptions.jvmTarget = "16"
 }
-
 
 shadowJar {
   classifier = 'fat'

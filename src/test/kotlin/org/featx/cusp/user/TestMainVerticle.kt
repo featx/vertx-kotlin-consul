@@ -1,4 +1,4 @@
-package com.juext.artisan.ucs
+package org.featx.cusp.user
 
 import io.vertx.core.Vertx
 import io.vertx.junit5.Timeout

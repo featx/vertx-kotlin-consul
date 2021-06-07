@@ -1,13 +1,12 @@
-package com.juext.artisan.ucs
+package org.featx.cusp.user
 
-import com.juext.artisan.ucs.enums.EventBusChannels
-import com.juext.artisan.ucs.handler.UserHandler
+import com.google.inject.Guice
+import com.google.inject.Stage
+import org.featx.cusp.user.enums.EventBusChannels
+import org.featx.cusp.user.handler.UserHandler
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
-import io.vertx.core.AbstractVerticle
-import io.vertx.core.DeploymentOptions
-import io.vertx.core.Future
-import io.vertx.core.Vertx
+import io.vertx.core.*
 import io.vertx.ext.web.Router
 import io.vertx.kotlin.config.configRetrieverOptionsOf
 import io.vertx.kotlin.config.configStoreOptionsOf
@@ -19,22 +18,25 @@ import kotlin.system.exitProcess
 class MainVerticle : AbstractVerticle() {
 
   @Inject
-  private var userHandler: UserHandler? = null
+  private lateinit var userHandler: UserHandler
 
-  override fun start(startFuture: Future<Void>) {
+  override fun start(startPromise: Promise<Void>) {
     val router = Router.router(vertx)
     router.route().path("/user/*").handler(userHandler)
-//    router.route().path()
-    vertx.createHttpServer().requestHandler(router).listen(8888) { http ->
-      if (http.succeeded()) {
-        startFuture.complete()
-        println("HTTP server started on port 8888")
-      } else {
-        startFuture.fail(http.cause())
+    vertx
+      .createHttpServer()
+      .requestHandler(router)
+      .listen(8888) { http ->
+        if (http.succeeded()) {
+          startPromise.complete()
+          println("HTTP server started on port 8888")
+        } else {
+          startPromise.fail(http.cause());
+        }
       }
-    }
   }
 }
+
 
 fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
@@ -48,10 +50,16 @@ fun main(args: Array<String>) {
       exitProcess(-1)
     }
     val config = ar.result()
-    config.put("guice_binder", AppContext::class.java.name)
+
     val instances = Runtime.getRuntime().availableProcessors()
     val deploymentOptions = DeploymentOptions().setInstances(instances).setConfig(config)
-    vertx.deployVerticle("java-guice:" + MainVerticle::class.java.name, deploymentOptions)
+
+    val injector = Guice.createInjector(Stage.PRODUCTION, AppContext(vertx))
+    vertx.registerVerticleFactory(GuiceVerticleFactory(injector))
+
+    vertx.deployVerticle("org.featx.cusp.user:" + MainVerticle::class.java.name, deploymentOptions)
+//    config.put("guice_binder", AppContext::class.java.name)
+//    vertx.deployVerticle("java-guice:" + MainVerticle::class.java.name, deploymentOptions)
   }
   // listen is called each time configuration changes
   configRetriever.listen { change ->
