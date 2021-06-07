@@ -58,8 +58,6 @@ fun main(args: Array<String>) {
     vertx.registerVerticleFactory(GuiceVerticleFactory(injector))
 
     vertx.deployVerticle("org.featx.cusp.user:" + MainVerticle::class.java.name, deploymentOptions)
-//    config.put("guice_binder", AppContext::class.java.name)
-//    vertx.deployVerticle("java-guice:" + MainVerticle::class.java.name, deploymentOptions)
   }
   // listen is called each time configuration changes
   configRetriever.listen { change ->
